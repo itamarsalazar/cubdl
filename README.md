@@ -2,7 +2,7 @@
 
 ## Description
 
-This repository is for the IEEE 2020 International Ultrasonics Symposium Challenge on Ultrasound Beamforming with Deep Learning. Example python starter code is provided to demonstrate the input data format and the metrics.
+This repository is for the IEEE 2020 International Ultrasonics Symposium [Challenge on Ultrasound Beamforming with Deep Learning](https://cubdl.jhu.edu/). Example python starter code is provided to demonstrate the input data format and the metrics.
 
 ## Input data format
 
