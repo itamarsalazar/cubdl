@@ -17,17 +17,16 @@ def _complex_rotate(I, Q, theta):
 ## PyTorch implementation of DAS
 # Expects all inputs to be torch tensors specified in SI units.
 # INPUTS
-#   idata       Real component of data  [nxmits, nelems, nsamps]
-#   qdata       Imag component of data  [nxmits, nelems, nsamps]
-#   txdel       Transmit delay profile  [nxmits, npixels]
-#   rxdel       Receive delay profile   [nelems, npixels]
-#   txapo       Transmit apodization    [nxmits, npixels]
-#   rxapo       Receive apodization     [nxmits, npixels]
-#   outshape    Desired shape of output [npixel_dims]
-#   fdemod      Demodulation frequency  scalar, 0 if data is RF-modulated
+#   P           A PlaneWaveData object that describes the acquisition
+#   grid        A [ncols, nrows, 3] numpy array of the reconstruction grid
+#   ang_list    A list of the angles to use in the reconstruction
+#   ele_list    A list of the elements to use in the reconstruction
+#   rxfnum      The f-number to use for receive apodization
+#   dtype       The torch Tensor datatype (defaults to torch.float)
+#   device      The torch Tensor device (defaults to GPU execution)
 # OUTPUTS
-#   idas    Real delay-and-summed output    [npixels]
-#   qdas    Imag delay-and-summed output    [npixels]
+#   idas        Real delay-and-summed output
+#   qdas        Imag delay-and-summed output
 def DAS_torch(
     P,
     grid,
@@ -71,7 +70,7 @@ def DAS_torch(
     time_zero = torch.zeros((nangles, 1), dtype=dtype, device=device)
     for i, tx in enumerate(ang_list):
         txdel[i] = delay_plane(grid, angles[[tx]], xlims) * P.fs / P.c
-        txapo[i] = apod_plane(grid, angles[[tx]], xlims) * 0 + 1
+        txapo[i] = apod_plane(grid, angles[[tx]], xlims)
         time_zero[i] = torch.tensor(P.time_zero[[tx]], dtype=dtype, device=device)
     for j, rx in enumerate(ele_list):
         rxdel[j] = delay_focus(grid, ele_pos[[rx]]) * P.fs / P.c
@@ -115,7 +114,7 @@ def DAS_torch(
 ## Compute distance to user-defined pixels from elements
 # Expects all inputs to be torch tensors specified in SI units.
 # INPUTS
-#   grid Pixel positions in x,y,z    [npixels, 3]
+#   grid    Pixel positions in x,y,z    [npixels, 3]
 #   ele_pos Element positions in x,y,z  [nelems, 3]
 # OUTPUTS
 #   dist    Distance from each pixel to each element [nelems, npixels]
@@ -130,9 +129,9 @@ def delay_focus(grid, ele_pos):
 # The distance is computed as x * sin(apod) + z * cos(apod) + w/2 * sin(|apod|)
 # Expects all inputs to be torch tensors specified in SI units.
 # INPUTS
-#   grid Pixel positions in x,y,z    [npixels, 3]
-#   ele_pos Element positions in x,y,z  [nelems, 3]
+#   grid    Pixel positions in x,y,z    [npixels, 3]
 #   angles  Plane wave angles (radians) [nangles]
+#   xlims   Azimuthal limits of the aperture [2]
 # OUTPUTS
 #   dist    Distance from each pixel to each element [nelems, npixels]
 def delay_plane(grid, angles, xlims):
@@ -151,10 +150,10 @@ def delay_plane(grid, angles, xlims):
 ## Compute rect apodization to user-defined pixels for desired f-number
 # Expects all inputs to be torch tensors specified in SI units.
 # INPUTS
-#   grid Pixel positions in x,y,z                [npixels, 3]
-#   ele_pos Element positions in x,y,z              [nelems, 3]
-#   fnum    Desired f-number                        scalar
-#   min_ele Minimum number of elements to retain    scalar
+#   grid        Pixel positions in x,y,z        [npixels, 3]
+#   ele_pos     Element positions in x,y,z      [nelems, 3]
+#   fnum        Desired f-number                scalar
+#   min_width   Minimum width to retain         scalar
 # OUTPUTS
 #   apod    Apodization for each pixel to each element  [nelems, npixels]
 def apod_focus(grid, ele_pos, fnum=1, min_width=1e-3):
@@ -179,9 +178,9 @@ def apod_focus(grid, ele_pos, fnum=1, min_width=1e-3):
 # Retain only pixels that lie within the aperture projected along the transmit angle.
 # Expects all inputs to be torch tensors specified in SI units.
 # INPUTS
-#   grid Pixel positions in x,y,z        [npixels, 3]
-#   ele_pos Element positions in x,y,z      [nelems, 3]
-#   angles  Plane wave angles (radians)     [nangles]
+#   grid    Pixel positions in x,y,z            [npixels, 3]
+#   angles  Plane wave angles (radians)         [nangles]
+#   xlims   Azimuthal limits of the aperture    [2]
 # OUTPUTS
 #   apod    Apodization for each angle to each element  [nangles, npixels]
 def apod_plane(grid, angles, xlims):
