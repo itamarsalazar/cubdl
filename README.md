@@ -46,8 +46,28 @@ Coming soon: Metrics will be provided in [metrics.py](metrics.py).
 
 ## Example code prerequisites
 
-The example code uses numpy and PyTorch to perform delay-and-sum beamforming. PyTorch can be installed to execute on a CUDA-enabled GPU by creating an anaconda environment with
+The example code depends on the following packages:
+
+- `numpy`
+- `scipy`
+- `matplotlib`
+- `tqdm`
+- `torch`
+
+Delay-and-sum beamforming are performed using PyTorch. Per their website, PyTorch can be installed to execute on a CUDA-enabled GPU by creating an anaconda environment with
 
 ```shell
 conda create -n cubdl python=3 pytorch torchvision cudatoolkit=10.1 -c pytorch
+```
+
+The remaining packages can be added by activating the environment and installing the desired packages:
+
+```shell
+conda install -n cubdl numpy scipy matplotlib tqdm
+```
+
+The code is auto-formatted with the `black` formatter:
+
+```shell
+conda install -n cubdl black rope pylint -c conda-forge
 ```

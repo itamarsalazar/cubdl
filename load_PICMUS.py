@@ -4,6 +4,7 @@
 
 import h5py
 import numpy as np
+from scipy.signal import hilbert
 
 
 class PlaneWaveData:
@@ -31,6 +32,10 @@ class PlaneWaveData:
         self.time_zero = np.array(f["initial_time"])
         self.ele_pos = np.array(f["probe_geometry"]).T
         self.fdemod = self.fc if dtype == "iq" else 0
+
+        if dtype == "rf":
+            iqdata = hilbert(self.idata, axis=-1)
+            self.qdata = np.imag(iqdata)
 
         # Make sure that time_zero is an array of size [nangles]
         if self.time_zero.size == 1:
