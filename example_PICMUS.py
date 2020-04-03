@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 from das_torch import DAS_torch
-from load_PICMUS import PlaneWaveData
+from PlaneWaveData import PICMUSData
 
 # Load PICMUS dataset
 database_path = "../datasets/picmus"
 acq = "simulation"
 target = "contrast_speckle"
 dtype = "iq"
-P = PlaneWaveData(database_path, acq, target, dtype)
+P = PICMUSData(database_path, acq, target, dtype)
 
 # Define pixel grid limits (assume y == 0)
 xlims = [P.ele_pos[0, 0], P.ele_pos[-1, 0]]
