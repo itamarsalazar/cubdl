@@ -26,7 +26,6 @@ class PlaneWaveData:
     
     Correct implementation can be checked by using the validate() method. See the
     PICMUSData class for a fully implemented example.
-    
     """
 
     def __init__(self):
@@ -70,7 +69,7 @@ class PICMUSData(PlaneWaveData):
 
     PICMUSData is a subclass of PlaneWaveData that loads the data from the PICMUS
     challenge from 2016 (https://www.creatis.insa-lyon.fr/Challenge/IEEE_IUS_2016).
-    PICMUSData re-implements 
+    PICMUSData re-implements the __init__() function of PlaneWaveData.
     """
 
     def __init__(self, database_path, acq, target, dtype):

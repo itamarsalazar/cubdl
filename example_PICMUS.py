@@ -7,6 +7,7 @@ import numpy as np
 from tqdm import tqdm
 from das_torch import DAS_torch
 from PlaneWaveData import PICMUSData
+from PixelGrid import make_pixel_grid
 
 # Load PICMUS dataset
 database_path = "../datasets/picmus"
@@ -21,16 +22,8 @@ zlims = [5e-3, 55e-3]
 wvln = P.c / P.fc
 dx = wvln / 4
 dz = dx  # Use square pixels
-eps = 1e-10
+grid = make_pixel_grid(xlims, zlims, dx, dz)
 fnum = 1
-
-# Generate pixel grid
-eps = 1e-10
-x = np.arange(xlims[0], xlims[1] + eps, dx)
-z = np.arange(zlims[0], zlims[1] + eps, dz)
-xx, zz = np.meshgrid(x, z, indexing="ij")
-yy = 0 * xx
-grid = np.stack((xx, yy, zz), axis=-1)
 
 # Make 75-angle image
 IN, QN = DAS_torch(P, grid)
