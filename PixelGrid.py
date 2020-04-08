@@ -9,7 +9,7 @@ def make_pixel_grid(xlims, zlims, dx, dz):
     eps = 1e-10
     x = np.arange(xlims[0], xlims[1] + eps, dx)
     z = np.arange(zlims[0], zlims[1] + eps, dz)
-    xx, zz = np.meshgrid(x, z, indexing="ij")
+    xx, zz = np.meshgrid(x, z, indexing="xy")
     yy = 0 * xx
     grid = np.stack((xx, yy, zz), axis=-1)
     return grid

@@ -5,7 +5,7 @@ import torch
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
-from das_torch import DAS_torch
+from das_torch import DAS_PW
 from PlaneWaveData import PICMUSData
 from PixelGrid import make_pixel_grid
 
@@ -25,17 +25,29 @@ dz = dx  # Use square pixels
 grid = make_pixel_grid(xlims, zlims, dx, dz)
 fnum = 1
 
+# Create a DAS_PW neural network for all angles, for 1 angle
+dasN = DAS_PW(P, grid)
+idx = len(P.angles) // 2  # Choose center angle for 1-angle DAS
+das1 = DAS_PW(P, grid, idx)
+
+# Make the input data a torch tensor
+iqdata = (
+    torch.tensor(P.idata, dtype=torch.float, device=torch.device("cuda:0")),
+    torch.tensor(P.qdata, dtype=torch.float, device=torch.device("cuda:0")),
+)
+
 # Make 75-angle image
-IN, QN = DAS_torch(P, grid)
-IQN = (IN + 1j * QN).T  # Tranpose for display purposes
-bimgN = 20 * np.log10(np.abs(IQN))  # Log-compress
+idasN, qdasN = dasN.forward(iqdata)
+idasN, qdasN = idasN.detach().cpu().numpy(), qdasN.detach().cpu().numpy()
+iqN = idasN + 1j * qdasN  # Tranpose for display purposes
+bimgN = 20 * np.log10(np.abs(iqN))  # Log-compress
 bimgN -= np.amax(bimgN)  # Normalize by max value
 
 # Make 1-angle image
-idx = len(P.angles) // 2  # Choose center angle
-I1, Q1 = DAS_torch(P, grid, idx)
-IQ1 = (I1 + 1j * Q1).T  # Transpose for display purposes
-bimg1 = 20 * np.log10(np.abs(IQ1))  # Log-compress
+idas1, qdas1 = das1.forward(iqdata)
+idas1, qdas1 = idas1.detach().cpu().numpy(), qdas1.detach().cpu().numpy()
+iq1 = idas1 + 1j * qdas1  # Transpose for display purposes
+bimg1 = 20 * np.log10(np.abs(iq1))  # Log-compress
 bimg1 -= np.amax(bimg1)  # Normalize by max value
 
 # Display images via matplotlib
