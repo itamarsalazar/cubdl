@@ -4,7 +4,6 @@
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
-from tqdm import tqdm
 from das_torch import DAS_PW
 from PlaneWaveData import PICMUSData
 from PixelGrid import make_pixel_grid

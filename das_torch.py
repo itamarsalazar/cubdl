@@ -5,6 +5,7 @@ import torch
 from torch.nn.functional import grid_sample
 from tqdm import tqdm
 
+
 PI = 3.14159265359
 
 
@@ -69,9 +70,7 @@ class DAS_PW(torch.nn.Module):
         self.device = device
 
     def forward(self, x):
-        """ Forward pass for DAS_PW neural network.
-        
-        """
+        """ Forward pass for DAS_PW neural network. """
         idata, qdata = x
         dtype, device = self.dtype, self.device
 
@@ -85,10 +84,12 @@ class DAS_PW(torch.nn.Module):
         txapo = torch.ones((nangles, npixels), dtype=dtype, device=device)
         rxapo = torch.ones((nelems, npixels), dtype=dtype, device=device)
         for i, tx in enumerate(self.ang_list):
-            txdel[i] = delay_plane(self.grid, self.angles[[tx]], xlims)
+            txdel[i] = delay_plane(self.grid, self.angles[[tx]])
             txdel[i] += self.time_zero[tx] * self.c
+            txapo[i] = apod_plane(self.grid, self.angles[tx], xlims)
         for j, rx in enumerate(self.ele_list):
             rxdel[j] = delay_focus(self.grid, self.ele_pos[[rx]])
+            rxapo[i] = apod_focus(self.grid, self.ele_pos[rx])
         # Convert to samples
         txdel *= self.fs / self.c
         rxdel *= self.fs / self.c
@@ -97,31 +98,116 @@ class DAS_PW(torch.nn.Module):
         idas = torch.zeros(npixels, dtype=self.dtype, device=self.device)
         qdas = torch.zeros(npixels, dtype=self.dtype, device=self.device)
         # Loop over angles and elements
-        for tx, td, ta in tqdm(zip(self.ang_list, txdel, txapo), total=nangles):
-            for rx, rd, ra in zip(self.ele_list, rxdel, rxapo):
-                # Grab data from i-th Tx, j-th Rx
-                I = idata[tx, rx].view(1, 1, 1, -1)
-                Q = qdata[tx, rx].view(1, 1, 1, -1)
+        for t, td, ta in tqdm(zip(self.ang_list, txdel, txapo), total=nangles):
+            for r, rd, ra in zip(self.ele_list, rxdel, rxapo):
+                # Grab data from t-th Tx, r-th Rx
+                iq = torch.stack((idata[t, r], qdata[t, r]), dim=0).view(1, 2, 1, -1)
                 # Convert delays to be used with grid_sample
                 delays = td + rd
-                d_gs = (delays.view(1, 1, -1, 1) * 2 + 1) / idata.shape[-1] - 1
-                d_gs = torch.cat((d_gs, 0 * d_gs), axis=-1)
+                dgs = (delays.view(1, 1, -1, 1) * 2 + 1) / idata.shape[-1] - 1
+                dgs = torch.cat((dgs, 0 * dgs), axis=-1)
                 # Interpolate using grid_sample and vectorize using view(-1)
-                itmp = grid_sample(I, d_gs, align_corners=False).view(-1)
-                qtmp = grid_sample(Q, d_gs, align_corners=False).view(-1)
+                ifoc, qfoc = grid_sample(iq, dgs, align_corners=False).view(2, -1)
                 # Apply phase-rotation if focusing demodulated data
                 if self.fdemod != 0:
                     tshift = delays.view(-1) / self.fs - self.grid[:, 2] * 2 / self.c
-                    theta = 2 * 3.14159265359 * self.fdemod * tshift
-                    itmp, qtmp = _complex_rotate(itmp, qtmp, theta)
+                    theta = 2 * PI * self.fdemod * tshift
+                    ifoc, qfoc = _complex_rotate(ifoc, qfoc, theta)
                 # Apply apodization, reshape, and add to running sum
                 apods = ta * ra
-                idas += itmp * apods
-                qdas += qtmp * apods
+                idas += ifoc * apods
+                qdas += qfoc * apods
 
         # Finally, restore the original pixel grid shape and convert to numpy array
         idas = idas.view(self.out_shape)
         qdas = qdas.view(self.out_shape)
+        return idas, qdas
+
+
+class DAS_FT(torch.nn.Module):
+    """ PyTorch implementation of DAS focused transmit beamforming.
+
+    This class implements DAS focused transmit beamforming as a neural network via a
+    PyTorch nn.Module. Subclasses derived from this class can choose to make certain
+    parameters trainable. All components can be turned into trainable parameters.
+    """
+
+    def __init__(
+        self, F, grid, rxfnum=2, dtype=torch.float, device=torch.device("cuda:0"),
+    ):
+        """ Initialization method for DAS_FT.
+
+        All inputs are specified in SI units, and stored in self as PyTorch tensors.
+        INPUTS
+        F           A FocusedData object that describes the acquisition
+        grid        A [ncols, nrows, 3] numpy array of the reconstruction grid
+        rxfnum      The f-number to use for receive apodization
+        dtype       The torch Tensor datatype (defaults to torch.float)
+        device      The torch Tensor device (defaults to GPU execution)
+        """
+        super().__init__()
+
+        # Convert focused transmit data to tensors
+        self.tx_ori = torch.tensor(F.tx_ori, dtype=dtype, device=device)
+        self.tx_dir = torch.tensor(F.tx_dir, dtype=dtype, device=device)
+        self.ele_pos = torch.tensor(F.ele_pos, dtype=dtype, device=device)
+        self.fc = torch.tensor(F.fc, dtype=dtype, device=device)
+        self.fs = torch.tensor(F.fs, dtype=dtype, device=device)
+        self.fdemod = torch.tensor(F.fdemod, dtype=dtype, device=device)
+        self.c = torch.tensor(F.c, dtype=dtype, device=device)
+        self.time_zero = torch.tensor(F.time_zero, dtype=dtype, device=device)
+
+        # Convert grid to tensor
+        self.grid = torch.tensor(grid, dtype=dtype, device=device)
+        self.out_shape = grid.shape[:-1]
+
+        # Store other information as well
+        self.dtype = dtype
+        self.device = device
+        self.rxfnum = torch.tensor(rxfnum)
+
+    def forward(self, x):
+        """ Forward pass for DAS_FT neural network.
+
+        """
+        idata, qdata = x
+        dtype, device = self.dtype, self.device
+        nxmits, nelems, nsamps = idata.shape
+        nx, nz = self.grid.shape[:2]
+
+        idas = torch.zeros((nx, nz), dtype=dtype, device=device)
+        qdas = torch.zeros((nx, nz), dtype=dtype, device=device)
+
+        # Loop through all transmits
+        for t in tqdm(range(nxmits)):
+            txdel = torch.norm(self.grid[t] - self.tx_ori[t].unsqueeze(0), dim=-1)
+            rxdel = delay_focus(self.grid[t].view(-1, 1, 3), self.ele_pos).T
+            delays = ((txdel + rxdel) / self.c + self.time_zero[t]) * self.fs
+            # Grab data from t-th transmit (N, C, H_in, W_in)
+            iq = torch.stack((idata[t], qdata[t]), axis=0).unsqueeze(0)
+            # Convert delays to be used with grid_sample (N, H_out, W_out, 2)
+            dgsz = (delays.unsqueeze(0) * 2 + 1) / idata.shape[-1] - 1
+            dgsx = torch.arange(nelems, dtype=dtype, device=device)
+            dgsx = ((dgsx * 2 + 1) / nelems - 1).view(1, -1, 1)
+            dgsx = dgsx + 0 * dgsz  # Match shape to dgsz via broadcasting
+            dgs = torch.stack((dgsz, dgsx), axis=-1)
+            ifoc, qfoc = grid_sample(iq, dgs, align_corners=False)[0]
+
+            # Apply phase-rotation if focusing demodulated data
+            if self.fdemod != 0:
+                tshift = delays / self.fs - self.grid[[t], :, 2] * 2 / self.c
+                theta = 2 * PI * self.fdemod * tshift
+                ifoc, qfoc = _complex_rotate(ifoc, qfoc, theta)
+
+            # Compute apodization
+            apods = apod_focus(self.grid[t], self.ele_pos, fnum=self.rxfnum)
+
+            # Apply apodization, reshape, and add to running sum
+            ifoc *= apods
+            qfoc *= apods
+            idas[t] = ifoc.sum(axis=0, keepdim=False)
+            qdas[t] = qfoc.sum(axis=0, keepdim=False)
+
         return idas, qdas
 
 
@@ -147,17 +233,13 @@ def delay_focus(grid, ele_pos):
 
 
 ## Compute distance to user-defined pixels for plane waves
-# The distance is computed as x * sin(apod) + z * cos(apod) + w/2 * sin(|apod|)
 # Expects all inputs to be torch tensors specified in SI units.
 # INPUTS
 #   grid    Pixel positions in x,y,z    [npixels, 3]
 #   angles  Plane wave angles (radians) [nangles]
-#   xlims   Azimuthal limits of the aperture [2]
 # OUTPUTS
 #   dist    Distance from each pixel to each element [nelems, npixels]
-def delay_plane(grid, angles, xlims):
-    # Compute width of full aperture (to determine angular offset)
-    w = (xlims[1] - xlims[0]).abs()
+def delay_plane(grid, angles):
     # Use broadcasting to simplify computations
     x = grid[:, 0].unsqueeze(0)
     z = grid[:, 2].unsqueeze(0)
@@ -179,17 +261,17 @@ def delay_plane(grid, angles, xlims):
 def apod_focus(grid, ele_pos, fnum=1, min_width=1e-3):
     # Get vector between elements and pixels via broadcasting
     ppos = grid.unsqueeze(0)
-    epos = ele_pos.unsqueeze(1)
+    epos = ele_pos.view(-1, 1, 3)
     v = ppos - epos
     # Select (ele,pix) pairs whose effective fnum is greater than fnum
     mask = torch.abs(v[:, :, 2] / v[:, :, 0]) > fnum
     mask = mask | (torch.abs(v[:, :, 0]) <= min_width)
     # Also account for edges of aperture
-    mask = mask | ((v[:, :, 0] >= min_width) & (ppos[:, :, 0] <= ele_pos[0, 0]))
-    mask = mask | ((v[:, :, 0] <= -min_width) & (ppos[:, :, 0] >= ele_pos[-1, 0]))
+    mask = mask | ((v[:, :, 0] >= min_width) & (ppos[:, :, 0] <= epos[0, 0, 0]))
+    mask = mask | ((v[:, :, 0] <= -min_width) & (ppos[:, :, 0] >= epos[-1, 0, 0]))
     # Convert to float and normalize across elements (i.e., delay-and-"average")
     apod = mask.float()
-    apod /= torch.sum(apod, 1, keepdim=True)
+    # apod /= torch.sum(apod, 0, keepdim=True)
     # Output has shape [nelems, npixels]
     return apod
 
@@ -205,13 +287,13 @@ def apod_focus(grid, ele_pos, fnum=1, min_width=1e-3):
 #   apod    Apodization for each angle to each element  [nangles, npixels]
 def apod_plane(grid, angles, xlims):
     pix = grid.unsqueeze(0)
-    ang = angles.unsqueeze(1)
+    ang = angles.view(-1, 1, 1)
     # Project pixels back to aperture along the defined angles
     x_proj = pix[:, :, 0] - pix[:, :, 2] * torch.tan(ang)
     # Select only pixels whose projection lie within the aperture, with fudge factor
     mask = (x_proj >= xlims[0] * 1.2) & (x_proj <= xlims[1] * 1.2)
     # Convert to float and normalize across angles (i.e., delay-and-"average")
     apod = mask.float()
-    apod /= torch.sum(apod, 1, keepdim=True)
+    # apod /= torch.sum(apod, 0, keepdim=True)
     # Output has shape [nangles, npixels]
     return apod
