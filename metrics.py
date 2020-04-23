@@ -4,21 +4,24 @@
 import numpy as np
 
 
+# Compute contrast ratio
 def contrast(img1, img2):
     return img1.mean() / img2.mean()
 
 
+# Compute contrast-to-noise ratio
 def cnr(img1, img2):
     return (img1.mean() - img2.mean()) / np.sqrt(img1.var() + img2.var())
 
 
+# Compute the generalized contrast-to-noise ratio
 def gcnr(img1, img2):
     _, bins = np.histogram(np.stack((img1, img2)), bins=256)
     f, _ = np.histogram(img1, bins=bins, density=True)
     g, _ = np.histogram(img2, bins=bins, density=True)
     f /= f.sum()
     g /= g.sum()
-    return l1loss(f, g) / 2 * f.size
+    return 1 - np.sum(np.minimum(f, g))
 
 
 def res_FWHM(img):
