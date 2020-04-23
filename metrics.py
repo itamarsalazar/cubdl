@@ -25,15 +25,13 @@ def gcnr(img1, img2):
 
 
 def res_FWHM(img):
-    pass
-
-
-def res_2pts(img):
-    pass
+    # TODO: Write FWHM code
+    raise NotImplementedError
 
 
 def speckle_res(img):
-    pass
+    # TODO: Write speckle edge-spread function resolution code
+    raise NotImplementedError
 
 
 def snr(img):
