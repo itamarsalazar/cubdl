@@ -71,8 +71,12 @@ class DAS_PW(torch.nn.Module):
 
     def forward(self, x):
         """ Forward pass for DAS_PW neural network. """
-        idata, qdata = x
         dtype, device = self.dtype, self.device
+
+        # Load data onto device as a torch tensor
+        idata, qdata = x
+        idata = torch.tensor(idata, dtype=dtype, device=device)
+        qdata = torch.tensor(qdata, dtype=dtype, device=device)
 
         # Compute delays in meters
         nangles = len(self.ang_list)
