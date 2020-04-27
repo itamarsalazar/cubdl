@@ -38,6 +38,8 @@ The desired pixel grid to be reconstructed is specified as
 
 ## Example delay-and-sum code
 
+![picmus](images/example_picmus.png)
+
 Simple examples of plane-wave delay-and-sum beamforming is provided in [das_torch.py](das_torch.py) and in [das_tf.py](das_tf.py). The example code depends on the following packages:
 
 - `numpy`
