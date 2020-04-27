@@ -36,31 +36,31 @@ The desired pixel grid to be reconstructed is specified as
   - Python: `ncols, nrows, 3 = grid.shape`
   - MATLAB: `[xyz, nrows, ncols] = size(grid);`.
 
-### Example delay-and-sum code
+## Example delay-and-sum code
 
-A simple example of delay-and-sum beamforming is provided in [das_torch.py](das_torch.py).
-
-### Metrics
-
-Coming soon: Metrics will be provided in [metrics.py](metrics.py).
-
-## Example code prerequisites
-
-The example code depends on the following packages:
+Simple examples of plane-wave delay-and-sum beamforming is provided in [das_torch.py](das_torch.py) and in [das_tf.py](das_tf.py). The example code depends on the following packages:
 
 - `numpy`
 - `scipy`
 - `matplotlib`
 - `tqdm`
-- `torch`
+- `h5py`
 
-Delay-and-sum beamforming are performed using PyTorch. Per their website, PyTorch can be installed to execute on a CUDA-enabled GPU by creating an anaconda environment with
+Anaconda is recommended for managing Python packages.
+
+To run the PyTorch DAS example on a CUDA-enabled GPU, create a conda environment with
 
 ```shell
 conda create -n cubdl python=3 pytorch torchvision cudatoolkit=10.1 -c pytorch
 ```
 
-The remaining packages can be added by activating the environment and installing the desired packages:
+To run the TensorFlow example on a CUDA-enabled GPU, create a conda environment with
+
+```shell
+conda create -n cubdl python=3 tensorflow-gpu=2
+```
+
+The remaining packages can be added by activating the environment and installing the desired packages, e.g.,
 
 ```shell
 conda install -n cubdl numpy scipy matplotlib tqdm
@@ -70,4 +70,48 @@ The code is auto-formatted with the `black` formatter:
 
 ```shell
 conda install -n cubdl black rope pylint -c conda-forge
+```
+
+## Metrics
+
+Some of the evaluation metrics have been included in [metrics.py](metrics.py). Note that no regions of interest (ROI) are provided; the ROIs will be selected on a per-dataset basis in the test data.
+
+### Within-Image Metrics
+
+Below, $`\mu_i`$, $`\sigma^2_i`$, and $`f_i`$ denote the mean, variance, and histogram of ROI $`i`$.
+
+```math
+\mathrm{Contrast} = \frac{\mu_1}{\mu_2}
+```
+
+```math
+\mathrm{CNR} = \frac{\mu_1-\mu_2}{\sqrt{\sigma^2_1 +\sigma^2_2}}
+```
+
+```math
+\mathrm{gCNR} = 1-\sum_{x} \min\{f_1(x), f_2(x)\}
+```
+
+```math
+\mathrm{SNR} = \frac{\mu}{\sigma}
+```
+
+### Cross-Image Metrics
+
+Below, $`x`$ and $`y`$ denote two images containing $`N`$ pixels each.
+
+```math
+\ell_1 = \frac{1}{N}\sum_{n=1}^N \left| x_n - y_n \right|
+```
+
+```math
+\ell_2 = \sqrt{\frac{1}{N}\sum_{n=1}^N \left| x_n - y_n \right|^2}
+```
+
+```math
+\mathrm{PSNR} = 20\log_{10} \frac{\mathrm{Dynamic Range}}{\sqrt{\frac{1}{N}\sum_{n=1}^N \left| x_n - y_n \right|^2}}
+```
+
+```math
+\mathrm{\rho} = \frac{ \sum_{n}(x_n-\mu_x)(y_n-\mu_y)}{\sqrt{(\sum_n |x_n-\mu_x|^2)(\sum_n |y_n-\mu_y|^2})}
 ```
