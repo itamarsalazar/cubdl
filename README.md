@@ -4,6 +4,13 @@
 
 This repository is for the IEEE 2020 International Ultrasonics Symposium [Challenge on Ultrasound Beamforming with Deep Learning](https://cubdl.jhu.edu/). Example python starter code is provided to demonstrate the input data format and the metrics.
 
+If you use this code, please cite the following two references:
+ 
+1. MAL Bell, J Huang, D Hyun, YC Eldar, R van Sloun, M Mischi, “Challenge on Ultrasound Beamforming with Deep Learning (CUBDL)”, Proceedings of the 2020 IEEE International Ultrasonics Symposium, 2020 [pdf]
+2. “Challenge on Ultrasound Beamforming with Deep Learning (CUBDL)”, IEEE Dataport, 2019. [Online]. Available: http://dx.doi.org/10.21227/f0hn-8f92
+ 
+We are also planning to release updated CUBDL evaluation code and integrated CUBDL-related datasets with the publication of a journal paper. Stay tuned for more details!
+
 ## Input data format
 
 During testing, we will provide the user with an object describing the acquisition, as well as a pixel grid to be reconstructed.
