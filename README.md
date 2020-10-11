@@ -6,7 +6,7 @@ This repository is for the IEEE 2020 International Ultrasonics Symposium [Challe
 
 If you use this code, please cite the following two references:
  
-1. MAL Bell, J Huang, D Hyun, YC Eldar, R van Sloun, M Mischi, “Challenge on Ultrasound Beamforming with Deep Learning (CUBDL)”, Proceedings of the 2020 IEEE International Ultrasonics Symposium, 2020 [pdf]
+1. MAL Bell, J Huang, D Hyun, YC Eldar, R van Sloun, M Mischi, “Challenge on Ultrasound Beamforming with Deep Learning (CUBDL)”, Proceedings of the 2020 IEEE International Ultrasonics Symposium, 2020. [[pdf]](https://cubdl.jhu.edu/wp-content/uploads/2020/09/IEEE_IUS_CUBDL_Paper_2020.pdf)
 2. “Challenge on Ultrasound Beamforming with Deep Learning (CUBDL)”, IEEE Dataport, 2019. [Online]. Available: http://dx.doi.org/10.21227/f0hn-8f92
  
 We are also planning to release updated CUBDL evaluation code and integrated CUBDL-related datasets with the publication of a journal paper. Stay tuned for more details!
