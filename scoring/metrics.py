@@ -2,11 +2,12 @@
 # Author:     Dongwoon Hyun (dongwoon.hyun@stanford.edu)
 # Created on: 2020-04-20
 import numpy as np
+from scipy.signal import find_peaks, peak_widths
 
 
 # Compute contrast ratio
 def contrast(img1, img2):
-    return img1.mean() / img2.mean()
+    return 20 * np.log10(img1.mean() / img2.mean())
 
 
 # Compute contrast-to-noise ratio
@@ -16,7 +17,7 @@ def cnr(img1, img2):
 
 # Compute the generalized contrast-to-noise ratio
 def gcnr(img1, img2):
-    _, bins = np.histogram(np.stack((img1, img2)), bins=256)
+    _, bins = np.histogram(np.concatenate((img1, img2)), bins=256)
     f, _ = np.histogram(img1, bins=bins, density=True)
     g, _ = np.histogram(img2, bins=bins, density=True)
     f /= f.sum()
@@ -25,8 +26,8 @@ def gcnr(img1, img2):
 
 
 def res_FWHM(img):
-    # TODO: Write FWHM code
-    raise NotImplementedError
+    mask = np.nonzero(img >= 0.5 * np.amax(img))[0]
+    return mask[-1] - mask[0]
 
 
 def speckle_res(img):
@@ -38,8 +39,21 @@ def snr(img):
     return img.mean() / img.std()
 
 
+def wopt_mae(ref, img):
+    # Find the optimal weight that minimizes the mean absolute error
+    wopt = np.median(ref / img)
+    return wopt
+
+
+def wopt_mse(ref, img):
+    # Find the optimal weight that minimizes the mean squared error
+    wopt = np.sum(ref * img) / np.sum(img * img)
+    return wopt
+
+
 ## Compute L1 error
 def l1loss(img1, img2):
+    # Return L1 error of images
     return np.abs(img1 - img2).mean()
 
 

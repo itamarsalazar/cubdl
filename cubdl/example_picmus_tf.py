@@ -4,12 +4,13 @@
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import numpy as np
-from das_tf import DAS_PW
-from PlaneWaveData import PICMUSData
-from PixelGrid import make_pixel_grid
+import os
+from cubdl.das_tf import DAS_PW
+from cubdl.PlaneWaveData import PICMUSData
+from cubdl.PixelGrid import make_pixel_grid
 
 # Load PICMUS dataset
-database_path = "../datasets/picmus"
+database_path = os.path.join("datasets", "data", "picmus")
 acq = "simulation"
 target = "contrast_speckle"
 dtype = "iq"

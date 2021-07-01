@@ -3,6 +3,7 @@
 # Created on: 2020-04-03
 import numpy as np
 import h5py
+import os
 from scipy.signal import hilbert
 
 
@@ -80,13 +81,11 @@ class PICMUSData(PlaneWaveData):
         assert any([dtype == d for d in ["rf", "iq"]])
 
         # Load PICMUS dataset
-        fname = "%s/%s/%s/%s_%s_dataset_%s.hdf5" % (
+        fname = os.path.join(
             database_path,
             acq,
             target,
-            target,
-            acq[:4],
-            dtype,
+            "%s_%s_dataset_%s.hdf5" % (target, acq[:4], dtype),
         )
         f = h5py.File(fname, "r")["US"]["US_DATASET0000"]
         self.idata = np.array(f["data"]["real"], dtype="float32")
