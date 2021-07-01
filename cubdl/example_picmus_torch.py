@@ -1,15 +1,16 @@
 # File:       example_PICMUS.py
 # Author:     Dongwoon Hyun (dongwoon.hyun@stanford.edu)
 # Created on: 2020-03-12
+import os
 import torch
 import matplotlib.pyplot as plt
 import numpy as np
-from das_torch import DAS_PW
-from PlaneWaveData import PICMUSData
-from PixelGrid import make_pixel_grid
+from cubdl.das_torch import DAS_PW
+from cubdl.PlaneWaveData import PICMUSData
+from cubdl.PixelGrid import make_pixel_grid
 
 # Load PICMUS dataset
-database_path = "../datasets/picmus"
+database_path = os.path.join("datasets", "data", "picmus")
 acq = "simulation"
 target = "contrast_speckle"
 dtype = "iq"
@@ -33,14 +34,14 @@ das1 = DAS_PW(P, grid, idx)
 iqdata = (P.idata, P.qdata)
 
 # Make 75-angle image
-idasN, qdasN = dasN.forward(iqdata)
+idasN, qdasN = dasN(iqdata)
 idasN, qdasN = idasN.detach().cpu().numpy(), qdasN.detach().cpu().numpy()
 iqN = idasN + 1j * qdasN  # Tranpose for display purposes
 bimgN = 20 * np.log10(np.abs(iqN))  # Log-compress
 bimgN -= np.amax(bimgN)  # Normalize by max value
 
 # Make 1-angle image
-idas1, qdas1 = das1.forward(iqdata)
+idas1, qdas1 = das1(iqdata)
 idas1, qdas1 = idas1.detach().cpu().numpy(), qdas1.detach().cpu().numpy()
 iq1 = idas1 + 1j * qdas1  # Transpose for display purposes
 bimg1 = 20 * np.log10(np.abs(iq1))  # Log-compress
@@ -54,4 +55,4 @@ plt.title("%d angles" % len(P.angles))
 plt.subplot(122)
 plt.imshow(bimg1, vmin=-60, cmap="gray", extent=extent, origin="upper")
 plt.title("Angle %d: %ddeg" % (idx, P.angles[idx] * 180 / np.pi))
-plt.show()
+plt.savefig("scratch.png")

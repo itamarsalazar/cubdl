@@ -1,2 +1,16 @@
 __pycache__
 .vscode
+*.hdf5
+*.zip
+*.pdf
+*.png
+*.jpg
+*.mat
+datasets/data
+datasets/soundspeed
+old
+scratch
+ustb
+results
+.idea/
+datasets/*_*_Data

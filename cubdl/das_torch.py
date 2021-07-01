@@ -60,7 +60,7 @@ class DAS_PW(torch.nn.Module):
         self.time_zero = torch.tensor(P.time_zero, dtype=dtype, device=device)
 
         # Convert grid to tensor
-        self.grid = torch.tensor(grid, dtype=dtype, device=device).view(-1, 3)
+        self.grid = torch.tensor(grid, dtype=dtype, device=device).reshape(-1, 3)
         self.out_shape = grid.shape[:-1]
 
         # Store other information as well
@@ -102,7 +102,8 @@ class DAS_PW(torch.nn.Module):
         idas = torch.zeros(npixels, dtype=self.dtype, device=self.device)
         qdas = torch.zeros(npixels, dtype=self.dtype, device=self.device)
         # Loop over angles and elements
-        for t, td, ta in tqdm(zip(self.ang_list, txdel, txapo), total=nangles):
+        for t, td, ta in zip(self.ang_list, txdel, txapo):
+            # for t, td, ta in tqdm(zip(self.ang_list, txdel, txapo), total=nangles):
             for r, rd, ra in zip(self.ele_list, rxdel, rxapo):
                 # Grab data from t-th Tx, r-th Rx
                 iq = torch.stack((idata[t, r], qdata[t, r]), dim=0).view(1, 2, 1, -1)
@@ -137,7 +138,7 @@ class DAS_FT(torch.nn.Module):
     """
 
     def __init__(
-        self, F, grid, rxfnum=2, dtype=torch.float, device=torch.device("cuda:0"),
+        self, F, grid, rxfnum=2, dtype=torch.float, device=torch.device("cuda:0")
     ):
         """ Initialization method for DAS_FT.
 
