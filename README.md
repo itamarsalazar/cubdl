@@ -2,18 +2,17 @@
 
 ## Description
 
-This repository is for the IEEE 2020 International Ultrasonics Symposium [Challenge on Ultrasound Beamforming with Deep Learning](https://cubdl.jhu.edu/). Example python starter code is provided to demonstrate the input data format and the metrics.
+This repository is for the IEEE 2020 International Ultrasonics Symposium [Challenge on Ultrasound Beamforming with Deep Learning](https://cubdl.jhu.edu/). Example python starter code was initially provided to demonstrate the input data format and the metrics. This repository was later updated on July 1, 2021 to integrate the CUBDL evaluation code with the CUBDL-related datasets.
 
-If you use this code, please cite the following two references:
+If you use this code, please cite the following three references:
  
 1. MAL Bell, J Huang, D Hyun, YC Eldar, R van Sloun, M Mischi, “Challenge on Ultrasound Beamforming with Deep Learning (CUBDL)”, Proceedings of the 2020 IEEE International Ultrasonics Symposium, 2020. [[pdf]](https://cubdl.jhu.edu/wp-content/uploads/2020/09/IEEE_IUS_CUBDL_Paper_2020.pdf)
-2. “Challenge on Ultrasound Beamforming with Deep Learning (CUBDL)”, IEEE Dataport, 2019. [Online]. Available: http://dx.doi.org/10.21227/f0hn-8f92
+2. Muyinatu A. Lediju Bell, Jiaqi Huang, Alycen Wiacek, Ping Gong, Shigao Chen, Alessandro Ramalli, Piero Tortoli, Ben Luijten, Massimo Mischi, Ole Marius Hoel Rindal, Vincent Perrot , Hervé Liebgott, Xi Zhang, Jiawen Luo, Olivier Bernard, Eniola Oluyemi, Emily Ambinder, “Challenge on Ultrasound Beamforming with Deep Learning (CUBDL) Datasets”, IEEE DataPort, 2019 [Online]. Available: http://dx.doi.org/10.21227/f0hn-8f92
+3. D. Hyun, A. Wiacek, S. Goudarzi, S. Rothlübbers, A. Asif, K. Eickel, Y. C. Eldar, J. Huang, M. Mischi, H. Rivaz, D. Sinden, R.J.G. van Sloun, H. Strohm, M. A. L. Bell, Deep Learning for Ultrasound Image Formation: CUBDL Evaluation Framework & Open Datasets, IEEE Transactions on Ultrasonics, Ferroelectrics, and Frequency Control **(accepted July 1, 2021)***
  
 We are also planning to release updated CUBDL evaluation code and integrated CUBDL-related datasets with the publication of a journal paper. Stay tuned for more details!
 
 ## Input data format
-
-During testing, we will provide the user with an object describing the acquisition, as well as a pixel grid to be reconstructed.
 
 ### Plane wave acquisition description
 
