@@ -34,7 +34,7 @@ As a reminder, all documents and publications that use any CUBDL-Related Data mu
 @misc{cubdl_data,
 doi = {10.21227/f0hn-8f92},
 url = {http://dx.doi.org/10.21227/f0hn-8f92},
-author = {Bell, Muyinatu A. Lediju and Huang, Jiaqi and Wiacek, Alycen and Ping Gong and Chen, Shigao and Ramalli, Alessandro and Tortoli, Piero and Luijten, Ben and Mischi, Massimo and Rindal, Ole Marius Hoel and Perrot, Vincent and Liebgott, Hervé and Zhang, Xi and Luo, Jianwen and Oluyemi, Eniola and Ambinder, Emily},
+author = {Bell, Muyinatu A. Lediju and Huang, Jiaqi and Wiacek, Alycen and Gong, Ping and Chen, Shigao and Ramalli, Alessandro and Tortoli, Piero and Luijten, Ben and Mischi, Massimo and Rindal, Ole Marius Hoel and Perrot, Vincent and Liebgott, Hervé and Zhang, Xi and Luo, Jianwen and Oluyemi, Eniola and Ambinder, Emily},
 publisher = {IEEE DataPort},
 title = {{Challenge on Ultrasound Beamforming with Deep Learning (CUBDL) Datasets}},
 url = {https://ieee-dataport.org/competitions/challenge-ultrasound-beamforming-deep-learning-cubdl-datasets}}
