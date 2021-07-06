@@ -90,7 +90,10 @@ def measure_point(beamformer, moniker, center_angle=False, verbose=True):
     plt.imshow(_dB(bimgs[3]), vmin=-40, cmap="gray", extent=exts[3], origin="upper")
     plt.suptitle("Point Targets")
     plt.pause(0.01)
-    plt.savefig(os.path.join("results",moniker,"point.jpg"))
+    outdir = os.path.join("results",moniker)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    plt.savefig(os.path.join(outdir,"point.jpg"))
 
 
 def _dB(x):

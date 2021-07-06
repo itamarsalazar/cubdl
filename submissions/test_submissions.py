@@ -2,6 +2,9 @@
 # Author:     Dongwoon Hyun (dongwoon.hyun@stanford.edu)
 # Created on: 2020-07-23
 import torch
+import os
+import sys
+sys.path.append(os.getcwd())
 import tensorflow as tf
 import numpy as np
 from cubdl.das_torch import DAS_PW

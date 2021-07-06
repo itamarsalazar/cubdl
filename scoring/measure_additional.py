@@ -94,4 +94,7 @@ def measure_additional(beamformer, moniker, center_angle=False, verbose=True):
 
     plt.suptitle("%s: Additional Targets" % moniker)
     plt.pause(0.01)
-    plt.savefig(os.path.join("results",moniker,"additional.jpg"))
+    outdir = os.path.join("results",moniker)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    plt.savefig(os.path.join(outdir,"additional.jpg"))

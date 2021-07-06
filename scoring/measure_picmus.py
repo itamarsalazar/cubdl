@@ -8,7 +8,7 @@ from cubdl.PixelGrid import make_pixel_grid
 
 def measure_picmus(beamformer, moniker, center_angle=False, verbose=True):
     # Load PICMUS dataset
-    database_path = os.path.join("datasets","data","picmus")
+    database_path = os.path.join("datasets","picmus")
     acq = "simulation"
     target = "contrast_speckle"
     dtype = "rf"
@@ -42,5 +42,8 @@ def measure_picmus(beamformer, moniker, center_angle=False, verbose=True):
     )
     plt.suptitle("%s: PICMUS" % moniker)
     plt.pause(0.01)
-    plt.savefig(os.path.join("results",moniker,"picmus.jpg"))
+    outdir = os.path.join("results",moniker)
+    if not os.path.exists(outdir):
+        os.makedirs(outdir)
+    plt.savefig(os.path.join(outdir,"picmus.jpg"))
 
