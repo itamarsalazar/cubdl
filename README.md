@@ -81,7 +81,7 @@ conda install -n cubdl black rope pylint -c conda-forge
 
 ## Metrics
 
-The following evaluation metrics have been included in [scoring/metrics.py](scoring/metrics.py). Initially no regions of interest (ROIs) were provided to the CUBDL participants. With the repository updates made on July 1st, the ROIs for each type of target are now defined within [scoring/make_rois_*.py](scoring). To generate and measure all predefined ROIs for the CUBDL Task 1 dataset, run [scoring/run_all.py](scoring/run_all.py).
+The following evaluation metrics have been included in [scoring/metrics.py](scoring/metrics.py). Initially no regions of interest (ROIs) were provided to the CUBDL participants. With the repository updates made on July 1st, the ROIs for each type of target are now defined within [scoring/make_rois_&lt;target-type&gt;.py](scoring). To generate and measure all predefined ROIs for the CUBDL Task 1 dataset, run [scoring/run_all.py](scoring/run_all.py).
 
 
 ### Within-Image Metrics
