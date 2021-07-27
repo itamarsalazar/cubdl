@@ -81,7 +81,8 @@ conda install -n cubdl black rope pylint -c conda-forge
 
 ## Metrics
 
-Some of the evaluation metrics have been included in [metrics.py](metrics.py). Note that no regions of interest (ROI) are provided; the ROIs will be selected on a per-dataset basis in the test data.
+The following evaluation metrics have been included in [scoring/metrics.py](scoring/metrics.py). Initially no regions of interest (ROIs) were provided to the CUBDL participants. With the repository updates made on July 1st, the ROIs for each type of target are now defined within [scoring/make_rois_<target>.py]. To generate and measure all predefined ROIs for the CUBDL Task 1 dataset, run [scoring/run_all.py](scoring/run_all.py).
+
 
 ### Within-Image Metrics
 
@@ -122,3 +123,10 @@ Below, $`x`$ and $`y`$ denote two images containing $`N`$ pixels each.
 ```math
 \mathrm{\rho} = \frac{ \sum_{n}(x_n-\mu_x)(y_n-\mu_y)}{\sqrt{(\sum_n |x_n-\mu_x|^2)(\sum_n |y_n-\mu_y|^2})}
 ```
+
+
+## Benchmark networks
+
+The network and trained weights submitted by the two CUBDL winners are provided within submissions/<first-author-last-name>. Loading and testing examples for these benchmark networks are provided in [submissions/test_submissions.py]
+
+For more details on these network architectures and the associated training process refer to [["Deep Learning for Ultrasound Image Formation: CUBDL Evaluation Framework & Open Datasets"]](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=9475029).
